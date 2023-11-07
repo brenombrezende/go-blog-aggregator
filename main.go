@@ -1,22 +1,41 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/brenombrezende/go-blog-aggregator/internal/database"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
+
+type apiConfig struct {
+	DB *database.Queries
+}
 
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal("Unable to load environment file")
+		log.Fatalf("Unable to load environment file - %s", err)
 	}
 
 	port := os.Getenv("PORT")
+	dbURL := os.Getenv("dbURL")
+
+	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		log.Fatalf("Unable to connect to the database - %s", err)
+	}
+
+	dbQueries := database.New(db)
+
+	apiCfg := apiConfig{
+		DB: dbQueries,
+	}
 
 	r := chi.NewRouter()
 
@@ -34,6 +53,8 @@ func main() {
 	v1 := chi.NewRouter()
 	v1.Get("/readiness", handleReadiness)
 	v1.Get("/err", handleError)
+
+	v1.Post("/users", apiCfg.handleCreateUsers)
 
 	r.Mount("/v1", v1)
 
