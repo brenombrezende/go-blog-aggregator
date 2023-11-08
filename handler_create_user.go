@@ -10,6 +10,7 @@ import (
 )
 
 func (cfg apiConfig) handleCreateUsers(w http.ResponseWriter, r *http.Request) {
+
 	type requestBody struct {
 		Name string
 	}

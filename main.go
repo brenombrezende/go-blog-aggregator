@@ -55,6 +55,7 @@ func main() {
 	v1.Get("/readiness", handleReadiness)
 	v1.Get("/users", apiCfg.middlewareAuth(apiCfg.handleGetUsers))
 
+	v1.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handleCreateFeeds))
 	v1.Post("/users", apiCfg.handleCreateUsers)
 
 	r.Mount("/v1", v1)
