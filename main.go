@@ -51,8 +51,9 @@ func main() {
 	}))
 
 	v1 := chi.NewRouter()
-	v1.Get("/readiness", handleReadiness)
 	v1.Get("/err", handleError)
+	v1.Get("/readiness", handleReadiness)
+	v1.Get("/users", apiCfg.middlewareAuth(apiCfg.handleGetUsers))
 
 	v1.Post("/users", apiCfg.handleCreateUsers)
 
