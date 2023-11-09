@@ -17,6 +17,11 @@ func (cfg apiConfig) handleCreateFeeds(w http.ResponseWriter, r *http.Request, u
 		Url  string
 	}
 
+	type responseBody struct {
+		Feed       Feed       `json:"feed"`
+		FeedFollow FeedFollow `json:"feed_follow"`
+	}
+
 	decoder := json.NewDecoder(r.Body)
 	req := requestBody{}
 	err := decoder.Decode(&req)
@@ -45,6 +50,23 @@ func (cfg apiConfig) handleCreateFeeds(w http.ResponseWriter, r *http.Request, u
 
 	convertedFeed := databaseFeedtoFeed(feed)
 
-	respondWithJSON(w, http.StatusAccepted, convertedFeed)
+	feedFollow, err := cfg.DB.CreateFeedFollow(r.Context(), database.CreateFeedFollowParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
+		FeedID:    feed.ID,
+		UserID:    user.ID,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Unable to create feed follow - %s", err))
+		return
+	}
+
+	convertedFeedFollow := databaseFeedFollowtoFeedFollow(feedFollow)
+
+	respondWithJSON(w, http.StatusAccepted, responseBody{
+		Feed:       convertedFeed,
+		FeedFollow: convertedFeedFollow,
+	})
 
 }

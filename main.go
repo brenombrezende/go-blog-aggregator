@@ -53,10 +53,15 @@ func main() {
 	v1 := chi.NewRouter()
 	v1.Get("/err", handleError)
 	v1.Get("/readiness", handleReadiness)
+	v1.Get("/feeds", apiCfg.handleGetFeeds)
 	v1.Get("/users", apiCfg.middlewareAuth(apiCfg.handleGetUsers))
+	v1.Get("/feed_follows", apiCfg.middlewareAuth(apiCfg.handleGetFeedFollow))
 
 	v1.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handleCreateFeeds))
+	v1.Post("/feed_follows", apiCfg.middlewareAuth(apiCfg.handleCreateFeedFollows))
 	v1.Post("/users", apiCfg.handleCreateUsers)
+
+	v1.Delete("/feed_follows/{feedFollowID}", apiCfg.handlerDeleteFeedFollows)
 
 	r.Mount("/v1", v1)
 
